@@ -1,0 +1,316 @@
+---
+title: "Revisión papers suelo"
+author: "Pamela E. Pairo"
+lang: es
+description: |
+  CCA
+format:
+  html:
+    theme: flatly
+    code-fold: show
+    code-tools: true
+    toc: true
+    toc-location: left
+---
+
+## Carga de base de datos
+
+Referencias Ecorregiones: 
+
+3  A.  PUNA Y/O ALTOS ANDES
+4= Cuyo; Altos Andes;  
+5= Puna,  Monte y Altos Andes ; 
+6= Puna;  16= Altos Andes; 
+11= Puna,  Monte y Altos Andes. Páramo, Yungas, 
+9= Puna,  Monte y Altos Andres; 
+12=  Puna, Páramo, Yungas y Chaco; 
+13= Puna, Monte, Patagonia Extraandina y Altos Andes; 
+
+2  B.   MESOPOTAMIA Y /O CHACO
+14= Chaco, Esteros del Iberá, Campos y 10; 10 Bosque Atlántico; 
+8= Bosque Atlántico, Campos  y malezles, ;  
+11 Selva
+20= Chaco+ Pampa; 
+19= Chaco+ Espinal; 
+8 Chaco, 
+3= Chaco; 
+7= Espinal; 
+15= Chaco, Humedal; 
+
+1  C.  PAMPA
+1= Pampa; 17= Todas; 
+
+4  D.   PATAGONIA
+2= Estepa Patagónica; 
+18= Estepa Patagónica+ Espinal; 
+21= Pampa+Estepa Patagónica, 
+
+
+Referencias Afiliación 1 Autor: 
+
+1      B   2= Universidad Nacional- CONICET; 6= Universidad Nacional- CONICET; 7= Universidad Nacional; 8= Universidad Internacional; 9= Universidad Privada; 13= CIC; 14= Universidad Nacional- CONICET-Administración de Parques Nacionales (APN); 15= Universidad Nacional- UNESCO; 16= Universidad Nacional + Internacional; 17= Universidad Nacional + Universidad Privada Nacional; 18=  Universidad Nacional- CONICET- CIC; 19= Universidad Nacional + Institución Privada ESTATAL; 
+
+2       A   1= CONICET; 
+
+3       D   21= Universidad Nacional- INTA
+4       C   3= INTA; 4= CONICET- INTA; 
+5       E   10=Institución Estatal, 11=  Institución Privada; 12= Institución Federal de investigación Internacional; 20= Institución Estatal + CONICET; 
+
+Integrated:
+No anova (Contraste de medias) y Multivariados 1               
+Prueba de medias.
+Análisis de diferencias.
+Comparación de grupos.
+Evaluación de varianzas.
+Prueba de varianzas.
+Estudio de medias.
+Análisis de medias.
+Comparación de promedios.
+Prueba de comparación de grupos).                                          Means Test
+Comparison of Means
+Variance Analysis
+Group Mean Analysis
+Difference Test
+Multigroup Analysis
+F-Test (used in the context of ANOVA)
+Multigroup Mean Comparison
+Factorial Analysis
+Variability Test
+
+Q1: Q con todos los parámetros ponderados de la misma manera desde a hasta h
+
+Q2: con los parámetros  f y g al cuadrado, es decir, ponderados
+
+## Referencias de columnas
+
+a. Plant factor affected besides production	
+b. Physicochemical Indexes and or indicators mentioned in the Results of the article paragraph	
+c. Physicochemical Indexes and or indicators mentioned in the Conclusions of the article paragraph	
+d. Physicochemical Indexes and or indicators mentioned in all the sections, including Title, Bibliography, and References	
+"e.Integrated statistical análysis:  Not only ANOVA and inlcudin Multivariate and regression analysis.
+
+b+c+d
+
+f. Indexes and or indicators mentioned in all the sections of the article paragraphs include Biological ones in the study mentioned by the considered article.	
+g. Indexes and or indicators mentioned in all the sections of the article paragraphs include Biological and or those that consider Endemic knowledge in the study mentioned by the considered article.
+h. Papers that have women as first authors.
+i. First author affiliation.
+j. Ecoregion where the study mentioned in the article was made.		
+k. Publishing year.
+Q1 Quality Index (Qi) Ci (real values of each parameter observed)/ ci* (permitted value for each parameter observed). Parámeters from a to k pondered in the same way.	
+Q2 Quality Index (Qi) Ci (real values of each parameter observed)/ ci* (permitted value for each parameter observed). Parámeters from a to k pondered in different way (f y g square).
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+library(ggplot2)
+library(FactoMineR)
+library(factoextra)
+library(readxl)
+library(tidyverse)
+```
+
+
+
+```{r}
+
+df <- read_excel("suelo_1.xlsx")# carga de la base de datos
+glimpse(df)
+```
+```{r}
+names <- c(5:9,1, 11, 12, 13)
+df[,names] <- lapply(df[,names] , factor)
+```
+
+```{r}
+glimpse(df)
+```
+Chequeando que no hayan categorias con un único dato.
+
+```{r}
+count(df, E) %>% arrange(n)
+```
+
+```{r}
+eco <- count(df, J) %>% arrange(n)
+```
+
+```{r}
+# Barplot
+
+ggplot(eco, aes(x=J, y=n)) + 
+  geom_bar( stat = "identity")+
+  scale_x_discrete(labels = c("1" = "Pampa", "2" = "Mesopotamia-Chaco", "3" = "Puna", "4"= "Patagonia")) +
+  ggtitle("")+labs(x = NULL, y = "Number of papers") +
+  theme_classic()
+```
+
+```{r}
+count(df, I)%>% arrange(n)
+```
+
+```{r}
+#Me quedo unicamente con las variables categóricas
+df_cat <-df %>% 
+      select(is.factor)
+```
+
+```{r}
+levels(df$I)
+```
+## Análisis de correspondencia
+
+```{r}
+admin.mca <- MCA(df_cat, graph = FALSE)# analisis correspondencia múltiple
+summary(admin.mca)
+```
+Debajo se muestra el screeplot con todas las variables incluidas
+
+```{r}
+fviz_screeplot(admin.mca, addlabels = TRUE, main= "")+ theme_classic()
+```
+
+El gráfico de abajo muestra la contribución de las variables originales sobre la primer componente del ACM.
+
+```{r}
+# Análisis de contribución de variables a dimensión 1
+fviz_contrib(admin.mca,choice="var",axes=1, fill="royalblue",color ="black",ggtheme = theme_classic(), top=10)+
+  ggtitle("")
+```
+
+```{r}
+fviz_mca_biplot( admin.mca ,
+                 repel  = TRUE) + 
+  labs(title='Biplot Análisis de correspondencias Múltiple')
+```
+```{r}
+fviz_mca_biplot( admin.mca , repel  =TRUE, col.ind="cos2",invisible="quali") + labs(title='Biplot Análisis de correspondencias Múltiple')
+```
+
+
+### Sacando la varible `Ecorregión`
+
+```{r}
+df2 <- df |>  select(-c("J")) |>  
+      select(is.factor)
+df2
+```
+```{r}
+admin.mca.ec <- MCA(df2, graph = FALSE)
+```
+
+```{r}
+
+fviz_mca_biplot( admin.mca.ec ,
+                 repel  =TRUE, label= "var") + 
+  labs(title='Biplot Análisis de correspondencias Múltiple sin Ecorregión')
+```
+
+```{r}
+fviz_contrib(admin.mca.ec,choice="var",axes=1, fill="royalblue",color ="black", ggtheme = theme_classic(), top=10)+
+  ggtitle("")
+```
+
+```{r}
+fviz_screeplot(admin.mca.ec, addlabels = TRUE, main="")+theme_classic()
+```
+
+```{r}
+# Definir la cantidad de categorías y generar una paleta de colores
+num_categorias <- length(unique(df$J))
+colores <- colorRampPalette(c("blue", "green", "red", "black"))(num_categorias)
+# Asignar colores a las observaciones basándose en la variable de categoría
+colores_observaciones <- colores[as.numeric(df$J)]
+
+biplot_colores <- fviz_mca_biplot(admin.mca.ec, 
+                                  repel  =TRUE,
+                                  col.ind = colores_observaciones)
+biplot_colores
+
+```
+
+```{r}
+# Eliminar filas con valores faltantes en la columna "Anio"
+df <- na.omit(df)
+
+# Convertir la columna "Anio" en factor
+grp <- as.factor(df[["H"]])
+
+fviz_mca_biplot(admin.mca.ec, label="var", col.var ="blue",
+   habillage=grp, addEllipses=TRUE, ellipse.level=0.8)+
+  ggtitle("")
+```
+
+```{r}
+grp <- as.factor(df[["I"]])
+
+fviz_mca_biplot(admin.mca.ec, label="var", col.var ="blue",
+   habillage=grp, addEllipses=TRUE, ellipse.level=0.7)+
+  ggtitle("")
+```
+
+### Sacando la varible `Afiliación_1_autor` y `Ecorregión`
+
+```{r}
+df3 <- df |>  select(-c("I", "J")) |>  
+      select(is.factor)
+```
+
+```{r}
+admin.mca.af1 <- MCA(df3, graph = FALSE)
+```
+
+```{r label= "biplot final"}
+
+fviz_mca_biplot( admin.mca.af1 ,
+                repel  =TRUE,
+                arrows= c(FALSE, TRUE),alpha.ind = 0.4, shape.var = 15,    
+                label= c("var"), max.overlaps= 8) + 
+  labs(title='')
+```
+
+```{r}
+fviz_screeplot(admin.mca.af1, addlabels = TRUE, main="")+ theme_classic()
+```
+
+```{r}
+fviz_contrib(admin.mca.af1,choice="var",axes=1, fill="royalblue",color ="black", top=10)+ ggtitle("")+ theme_classic()
+```
+
+```{r}
+
+grp <- as.factor(df[["H"]])
+
+fviz_mca_biplot(admin.mca.af1, label="var", col.var ="blue",
+   habillage=grp, addEllipses=TRUE, ellipse.level=0.8)+ ggtitle("")
+```
+
+```{r}
+
+grp <- as.factor(df[["I"]])
+
+fviz_mca_biplot(admin.mca.af1, label="var", col.var ="blue",
+   habillage=grp, addEllipses=TRUE, ellipse.level=0.8)
+```
+
+## Sacando los papers 2020
+
+```{r}
+df_sin2020 <- df_cat |> filter(K != 2020)
+```
+
+```{r}
+admin.mca.s2020 <- MCA(df_sin2020, graph = FALSE)
+```
+
+```{r}
+
+fviz_mca_biplot( admin.mca.s2020 ,
+                 repel  =TRUE, label= "var") + 
+  labs(title='')
+```
+
+```{r}
+fviz_contrib(admin.mca.s2020,choice="var",axes=1, fill="royalblue",color ="black", top=10)+ggtitle("")+ theme_classic()
+```
